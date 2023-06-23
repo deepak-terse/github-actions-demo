@@ -1,0 +1,59 @@
+name: Auto Increment Version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  increment_version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+        
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Check commit message
+        id: commit_message
+        run: echo "::set-output name=message::${{ github.event.head_commit.message }}"
+        
+      - name: Determine version increment
+        id: version_increment
+        run: |
+          commit_message="${{ steps.commit_message.outputs.message }}"
+          if [[ $commit_message == *"minor"* ]]; then
+            echo "::set-output name=increment::minor"
+          elif [[ $commit_message == *"major"* ]]; then
+            echo "::set-output name=increment::major"
+          elif [[ $commit_message == *"hotfix"* ]]; then
+            echo "::set-output name=increment::patch"
+          else
+            echo "::set-output name=increment::none"
+          fi
+        
+      - name: Increment package.json version
+        run: |
+          increment="${{ steps.version_increment.outputs.increment }}"
+          if [[ $increment != "none" ]]; then
+            echo "Incrementing package.json version..."
+            npm version $increment --no-git-tag-version
+            echo "Incremented package.json version using $increment"
+          else
+            echo "No version increment detected. Skipping..."
+          fi
+        
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json
+          git commit -m "Auto-increment package.json version"
+          git push
