@@ -53,24 +53,24 @@ jobs:
             echo "No version increment detected. Skipping..."
           fi
 
-      - name: Commit and push changes
-        run: |
-          git status
-          git push origin main
-
-          git fetch origin main
-          git reset --hard origin/main
-          
-          git add package.json
-          git commit -m "${{ steps.commit.outputs.message }}"
-          git reset --hard origin/main
-          git push
-
-
       # - name: Commit and push changes
       #   run: |
-      #     git config --local user.email "action@github.com"
-      #     git config --local user.name "GitHub Action"
+      #     git status
+      #     git push origin main
+
+      #     git fetch origin main
+      #     git reset --hard origin/main
+
       #     git add package.json
-      #     git commit -m "Auto-increment package.json version"
+      #     git commit -m "${{ steps.commit.outputs.message }}"
+      #     git reset --hard origin/main
       #     git push
+
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json
+          git commit -m "Auto-increment package.json version"
+          git push
