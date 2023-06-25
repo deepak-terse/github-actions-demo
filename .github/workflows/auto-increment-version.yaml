@@ -55,6 +55,12 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          git status
+          git push origin main
+
+          git fetch origin main
+          git reset --hard origin/main
+          
           git add package.json
           git commit -m "${{ steps.commit.outputs.message }}"
           git reset --hard origin/main
