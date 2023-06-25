@@ -49,12 +49,13 @@ jobs:
           else
             echo "No version increment detected. Skipping..."
           fi
-        
+
       - name: Commit and push changes
         run: |
+          author=$(git show -s --format='%ae' ${{ github.sha }})
           commit_message="${{ steps.commit_message.outputs.message }}"
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email $author
+          git config --local user.name $author
           git add package.json
           git commit -m $commit_message
           git push
