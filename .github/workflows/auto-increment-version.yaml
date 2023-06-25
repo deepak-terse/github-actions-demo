@@ -44,7 +44,7 @@ jobs:
           increment="${{ steps.version_increment.outputs.increment }}"
           if [[ $increment != "none" ]]; then
             echo "Incrementing package.json version..."
-            npm version $increment --no-git-tag-version
+            npm version $increment
             echo "Incremented package.json version using $increment"
           else
             echo "No version increment detected. Skipping..."
@@ -52,8 +52,9 @@ jobs:
         
       - name: Commit and push changes
         run: |
+          commit_message="${{ steps.commit_message.outputs.message }}"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add package.json
-          git commit -m "Auto-increment package.json version"
+          git commit -m $commit_message
           git push
