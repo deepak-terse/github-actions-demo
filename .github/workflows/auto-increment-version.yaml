@@ -22,13 +22,16 @@ jobs:
         run: npm ci
         
       - name: Check commit message
-        id: commit_message
-        run: echo "::set-output name=message::${{ github.event.head_commit.message }}"
+        id: commit
+        run: |
+          echo "::set-output name=message::${{ github.event.head_commit.message }}"
+          echo "::set-output name=authorName::${{ github.event.head_commit.author.name }}"
+          echo "::set-output name=authorEmail::${{ github.event.head_commit.author.email }}"
         
       - name: Determine version increment
         id: version_increment
         run: |
-          commit_message="${{ steps.commit_message.outputs.message }}"
+          commit_message="${{ steps.commit.outputs.message }}"
           if [[ $commit_message == *"minor"* ]]; then
             echo "::set-output name=increment::minor"
           elif [[ $commit_message == *"major"* ]]; then
@@ -52,10 +55,8 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          author=$(git show -s --format='%ae' ${{ github.sha }})
-          commit_message="${{ steps.commit_message.outputs.message }}"
-          git config --local user.email $author
-          git config --local user.name $author
+          git config --local user.email "${{ steps.commit.outputs.authorEmail }}"
+          git config --local user.name "${{ steps.commit.outputs.authorName }}"
           git add package.json
-          git commit -m $commit_message
+          git commit -m "${{ steps.commit.outputs.message }}"
           git push
