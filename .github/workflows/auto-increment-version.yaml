@@ -57,4 +57,5 @@ jobs:
         run: |
           git add package.json
           git commit -m "${{ steps.commit.outputs.message }}"
-          git push --force 
+          git pull
+          git push 
